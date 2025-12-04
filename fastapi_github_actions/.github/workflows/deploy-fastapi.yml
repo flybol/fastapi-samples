@@ -2,17 +2,15 @@ name: deploy_fastapi
 
 on:
   push:
-    # 打 tag 时触发，如 fastapi_v1.0.0 / fastapi_v2.3.4
-    tags:
-      - "fastapi_v*"
-
+    # 更新fastapi_github_actions 分支时触发构建
+    branches: ["fastapi_github_actions"]
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     env:
       PYTHON_VERSION: "3.10"        # CI 环境 Python 版本（建议与服务器一致）
-      SERVICE_NAME: "fastapi-app"   # systemd 里你的服务名：fastapi-app.service
+      SERVICE_NAME: "fastapi_github_actions"   # systemd 里你的服务名：fastapi_github_actions.service
 
     steps:
       # 1. 拉取代码
@@ -76,18 +74,18 @@ jobs:
             --exclude ".idea" \
             --exclude ".pytest_cache" \
             ./ \
-            $SSH_USER@$SSH_HOST:$SSH_TARGET_DIR
+            $SSH_USER@$SSH_HOST:$SSH_PROJECT_DIR
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_TARGET_DIR: ${{ secrets.SSH_TARGET_DIR }}
+          SSH_TARGET_DIR: ${{ secrets.SSH_PROJECT_DIR }}
 
       # 8. 远程部署：安装/更新 uv，uv sync，迁移数据库，重启 systemd 服务
       - name: Remote deploy with uv
         env:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_TARGET_DIR: ${{ secrets.SSH_TARGET_DIR }}
+          SSH_TARGET_DIR: ${{ secrets.SSH_PROJECT_DIR }}
           SERVICE_NAME: ${{ env.SERVICE_NAME }}
         run: |
           ssh $SSH_USER@$SSH_HOST << EOF
