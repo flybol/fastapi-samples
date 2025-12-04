@@ -3,7 +3,7 @@ name: deploy_fastapi
 on:
   push:
     # 更新fastapi_github_actions 分支时触发构建
-    branches: ["fastapi_github_actions"]
+    branches: ["fastapi","fastapi_github_actions"]
 jobs:
   deploy:
     runs-on: ubuntu-latest
